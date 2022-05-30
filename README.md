@@ -8,20 +8,23 @@ A docker image and container of PostgreSQL with the columnar store. The data use
     - [Pull image from docker hub](#Build-image)
     - [Run container](#Run-container)
     - [Load data](#Load-data)
-    - [Export volume](#Export volume)
+    - [Export volume](#Export-volume)
+- [Python client](#Python-client)
+    - [Manipulate container](#Manipulate-container)
+    - [Manipulate postgres_cstore](#Manipulate-postgres_cstore)
     
 ## Building steps
 
 ### Pull image from docker hub
 
-```sh
+```shell
 # Pull image from docker hub
 $ docker pull takahish/postgres-cstore:12.11  # latest version is 12.11
 ```
 
 #### ... or manually build image
 
-```sh
+```shell
 # Clone this repository.
 $ git clone https://github.com/takahish/postgres-cstore.git
 
@@ -37,7 +40,7 @@ $ docker build -t postgres-cstore:12.11 .
 
 ### Run container
 
-```sh
+```shell
 # Detach posgres-cstore.
 # If you build image manually, You change the image name to postgres-cstore:12.11. 
 $ docker run --name postgres-cstore -p 5432:5432 -e POSTGRES_USER=dwhuser -e POSTGRES_PASSWORD=dwhuser -v warehouse:/var/lib/postgresql/data -d takahish/postgres-cstore:12.11
@@ -60,7 +63,7 @@ dwhuser=# \q
 
 ### Load data
 
-```sh
+```shell
 # Download sample data.
 $ data/download_customer_reviews.sh
 
@@ -111,12 +114,12 @@ $ psql -h localhost -d dwhuser -f src/dml/take_correlation_customer_reviews.sql
 
 ### Export volume
 
-```sh
+```shell
 # Export volume to persist data.
 $ docker run --rm --volumes-from postgres-cstore -v $(pwd):/backup debian:latest tar zcvf /backup/warehouse.tar.gz /var/lib/postgresql/data
 ```
 
-```sh
+```shell
 # Pull image from docker hub
 $ docker pull takahish/postgres-cstore:12.11  # latest version is 12.11
 
@@ -156,4 +159,112 @@ $ psql -h localhost -d dwhuser -f src/dml/take_correlation_customer_reviews.sql
                    5 |           4.30 | 118422
                    6 |           4.40 | 116412
 (6 rows)
+```
+
+## Python client
+
+### Manipulate container
+
+```pycon
+>>> from postgres_cstore.container import Container
+>>> c = Container()
+>>> c.run()  # Run container from image and start container.
+>>> c.run()  # An error occurs if the container already exists. 
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/Users/takahiro/work/postgres-cstore/postgres_cstore/container.py", line 56, in run
+    volume=self.volume
+  File "/Users/takahiro/work/postgres-cstore/postgres_cstore/process.py", line 17, in run
+    raise Exception(output)
+Exception: docker: Error response from daemon: Conflict. The container name "/postgres-cstore" is already in use by container "56f3bdc5855a0e6a467854d656dd051ae46e9fc2c39de12ab09c097752a80f03". You have to remove (or rename) that container to be able to reuse that name.
+See 'docker run --help'.
+'postgres-cstore'
+>>> c.stop()  # Stop container.
+'postgres-cstore'
+>>> c.start()  # Start container if the container already exists.
+'postgres-cstore'
+>>> c.stop()  # Stop container.
+'postgres-cstore'
+>>>
+```
+
+### Manipulate postgres_cstore
+
+The First is an execution of SQL. The exec method returns an output as a string.
+
+```pycon
+>>> from postgres_cstore.postgres_cstore import PostgresCstore
+>>> ps = PostgresCstore()
+>>> print(ps.exec(sql="SELECT customer_id, review_date from customer_reviews LIMIT 10;"))  # Execute sql.
+customer_id   | review_date 
+----------------+-------------
+ AE22YDHSBFYIP  | 1970-12-30
+ AE22YDHSBFYIP  | 1970-12-30
+ ATVPDKIKX0DER  | 1995-06-19
+ AH7OKBE1Z35YA  | 1995-06-23
+ ATVPDKIKX0DER  | 1995-07-14
+ A102UKC71I5DU8 | 1995-07-18
+ A1HPIDTM9SRBLP | 1995-07-18
+ A1HPIDTM9SRBLP | 1995-07-18
+ ATVPDKIKX0DER  | 1995-07-18
+ ATVPDKIKX0DER  | 1995-07-18
+(10 rows)
+>>> print(ps.exec_from_file(sql_file="src/dml/find_customer_reviews.sql"))  # Execute sql that is written in a file.
+customer_id   | review_date | review_rating | product_id 
+----------------+-------------+---------------+------------
+ A27T7HVDXA3K2A | 1998-04-10  |             5 | 0399128964
+ A27T7HVDXA3K2A | 1998-04-10  |             5 | 044100590X
+ A27T7HVDXA3K2A | 1998-04-10  |             5 | 0441172717
+ A27T7HVDXA3K2A | 1998-04-10  |             5 | 0881036366
+ A27T7HVDXA3K2A | 1998-04-10  |             5 | 1559949570
+(5 rows)
+```
+
+The second is an extraction of data from the output. The output is pandas.DataFrame object. The method doesn’t need a Postgres client library such as pycong2 (It only needs pandas).
+
+```pycon
+>>> df = ps.ext(sql="SELECT customer_id, review_date from customer_reviews LIMIT 10;")
+>>> df
+      customer_id review_date
+0   AE22YDHSBFYIP  1970-12-30
+1   AE22YDHSBFYIP  1970-12-30
+2   ATVPDKIKX0DER  1995-06-19
+3   AH7OKBE1Z35YA  1995-06-23
+4   ATVPDKIKX0DER  1995-07-14
+5  A102UKC71I5DU8  1995-07-18
+6  A1HPIDTM9SRBLP  1995-07-18
+7  A1HPIDTM9SRBLP  1995-07-18
+8   ATVPDKIKX0DER  1995-07-18
+9   ATVPDKIKX0DER  1995-07-18
+>>> df = ps.ext_from_file(sql_file="src/dml/find_customer_reviews.sql")
+>>> df
+      customer_id review_date  review_rating  product_id
+0  A27T7HVDXA3K2A  1998-04-10              5  0399128964
+1  A27T7HVDXA3K2A  1998-04-10              5  044100590X
+2  A27T7HVDXA3K2A  1998-04-10              5  0441172717
+3  A27T7HVDXA3K2A  1998-04-10              5  0881036366
+4  A27T7HVDXA3K2A  1998-04-10              5  1559949570
+```
+
+The methods exports a temporary file to ${HOME}/.postgres_cstore/tmp/*.
+
+```shell
+$ ls ${HOME}/.postgres_cstore/tmp
+find_customer_reviews   undefined
+$ ls /Users/takahiro/.postgres_cstore/tmp/undefined/
+20220530211006.csv
+$ ls /Users/takahiro/.postgres_cstore/tmp/find_customer_reviews/
+20220530210928.csv
+```
+
+When loading data to a table, it has to create a foreign table in advance. Then load method loads data to the table.
+
+```pycon
+>>> ps.exec_from_file(sql_file="src/ddl/create_customer_reviews.sql")
+'CREATE FOREIGN TABLE'
+>>> ps.load(csv_file="data/customer_reviews_1998.csv", target_table="customer_reviews")
+'COPY 589859'
+>>> ps.load(csv_file="data/customer_reviews_1999.csv", target_table="customer_reviews")
+'COPY 1172645'
+>>>
 ```

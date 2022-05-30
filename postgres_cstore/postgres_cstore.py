@@ -92,12 +92,13 @@ class PostgresCstore(object):
         _ = Process.run(cmd=cmd.format(uri=self.psql_uri, sql_file=sql_file, tmp_file=tmp_file))
         return pd.read_csv(tmp_file)
 
-    def load(self, csv_file: str, table: str) -> str:
+    def load(self, csv_file: str, target_table: str) -> str:
         """
         :param csv_file:
         :param table:
         :return:
         """
         cmd = "psql \"{uri}\" -c \"{meta}\""
-        meta = "\\copy {table} from '{csv_file}' with csv"
-        return Process.run(cmd.format(uri=self.psql_uri, meta=meta.format(table=table, csv_file=csv_file)))
+        meta = "\\copy {target_table} from '{csv_file}' with csv"
+        return Process.run(cmd.format(uri=self.psql_uri,
+                                      meta=meta.format(target_table=target_table, csv_file=csv_file)))
