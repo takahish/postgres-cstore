@@ -1,0 +1,1 @@
+\copy customer_reviews from 'data/customer_reviews_1998.csv' with csv
