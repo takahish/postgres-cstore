@@ -29,7 +29,7 @@ class PostgresCstore(object):
         """
         # Set container settings.
         self.name = name if name is not None else config.get('CONTAINER', 'name')
-        self.image= image if image is not None else config.get('CONTAINER', 'image')
+        self.image = image if image is not None else config.get('CONTAINER', 'image')
         self.version = version if version is not None else config.get('CONTAINER', 'version')
         self.volume = volume if volume is not None else config.get('CONTAINER', 'volume')
 
@@ -65,7 +65,7 @@ class PostgresCstore(object):
         cmd = "psql \"{uri}\" -f \"{sql_file}\""
         return Process.run(cmd=cmd.format(uri=self.psql_uri, sql_file=sql_file))
 
-    def ext(self, sql: str) -> str:
+    def ext(self, sql: str) -> pd.DataFrame:
         """Extract data from output of sql as pandas.DataFrame.
         :param sql: str
         :return: pandas.DataFrame.
@@ -78,7 +78,7 @@ class PostgresCstore(object):
         _ = Process.run(cmd=cmd.format(uri=self.psql_uri, sql=sql, tmp_file=tmp_file))
         return pd.read_csv(tmp_file)
 
-    def ext_from_file(self, sql_file: str) -> str:
+    def ext_from_file(self, sql_file: str) -> pd.DataFrame:
         """Extract data from output of sql as pandas.DataFrame. The sql is written in file.
         :param sql_file: str
         :return: pandas.DataFrame.
@@ -93,10 +93,10 @@ class PostgresCstore(object):
         return pd.read_csv(tmp_file)
 
     def load(self, csv_file: str, target_table: str) -> str:
-        """
-        :param csv_file:
-        :param table:
-        :return:
+        """ Then load method loads data to the table.
+        :param csv_file: str
+        :param target_table: str
+        :return: str
         """
         cmd = "psql \"{uri}\" -c \"{meta}\""
         meta = "\\copy {target_table} from '{csv_file}' with csv"

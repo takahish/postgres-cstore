@@ -178,7 +178,6 @@ Traceback (most recent call last):
     raise Exception(output)
 Exception: docker: Error response from daemon: Conflict. The container name "/postgres-cstore" is already in use by container "56f3bdc5855a0e6a467854d656dd051ae46e9fc2c39de12ab09c097752a80f03". You have to remove (or rename) that container to be able to reuse that name.
 See 'docker run --help'.
-'postgres-cstore'
 >>> c.stop()  # Stop container.
 'postgres-cstore'
 >>> c.start()  # Start container if the container already exists.
