@@ -1,52 +1,27 @@
-import configparser
 from datetime import datetime
 import os
 import pandas as pd
+from postgres_cstore.config import Config
 from postgres_cstore.process import Process
-
-# Load configurations
-config = configparser.ConfigParser()
-config.read('conf/system.ini')
 
 
 class PostgresCstore(object):
     """PostgresCstore class.
     """
-    def __init__(self,
-                 name=None, image=None, version=None, volume=None,  # Container settings.
-                 user=None, password=None, host=None, port=None, database=None  # Connection settings.
-                 ) -> None:
+    def __init__(self, config: Config) -> None:
         """Initialize container.
-        :param name: str. A container is created from a docker image specified by an image argument.
-        :param image: str. An image is based by a container.
-        :param version: str. It is a version of a docker image specified by an image argument.
-        :param volume: str. It is a volume of a container.
-        :param user: str. It is a user of postgres-cstore.
-        :param password: str. It is password of a user.
-        :param host:
-        :param port: str. A port is used by postgres-cstore.
-        :param database:
+        :param config: Configuration of postgres-cstore.
         """
-        # Set container settings.
-        self.name = name if name is not None else config.get('CONTAINER', 'name')
-        self.image = image if image is not None else config.get('CONTAINER', 'image')
-        self.version = version if version is not None else config.get('CONTAINER', 'version')
-        self.volume = volume if volume is not None else config.get('CONTAINER', 'volume')
+        # Set an instance attribution as a delegation.
+        self.config = config
 
-        # Set connection settings.
-        self.user = user if user is not None else config.get('CONNECTION', 'user')
-        self.password = password if password is not None else config.get('CONNECTION', 'password')
-        self.host = host if host is not None else config.get('CONNECTION', 'host')
-        self.port = port if port is not None else config.get('CONNECTION', 'port')
-        self.database = database if database is not None else config.get('CONNECTION', 'database')
-
-        # Set command-line execution.
+        # Set URI for command-line execution.
         self.psql_uri = "postgresql://{user}:{password}@{host}:{port}/{database}".format(
-            user=self.user,
-            password=self.password,
-            host=self.host,
-            port=self.port,
-            database=self.database
+            user=self.config.user,
+            password=self.config.password,
+            host=self.config.host,
+            port=self.config.port,
+            database=self.config.database
         )
 
     def exec(self, sql: str) -> str:
