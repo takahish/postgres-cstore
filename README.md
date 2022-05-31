@@ -166,8 +166,9 @@ $ psql -h localhost -d dwhuser -f src/dml/take_correlation_customer_reviews.sql
 ### Manipulate container
 
 ```pycon
+>>> from postgres_cstore.config import Config
 >>> from postgres_cstore.container import Container
->>> c = Container()
+>>> c = Container(config=Config())  # The default configuration is the same as conf/system.ini
 >>> c.run()  # Run container from image and start container.
 >>> c.run()  # An error occurs if the container already exists. 
 Traceback (most recent call last):
@@ -192,8 +193,9 @@ See 'docker run --help'.
 The First is an execution of SQL. The exec method returns an output as a string.
 
 ```pycon
+>>> from postgres_cstore.config import Config
 >>> from postgres_cstore.postgres_cstore import PostgresCstore
->>> ps = PostgresCstore()
+>>> ps = PostgresCstore(config=Config())  # The default configuration is the same as conf/system.ini
 >>> print(ps.exec(sql="SELECT customer_id, review_date from customer_reviews LIMIT 10;"))  # Execute sql.
 customer_id   | review_date 
 ----------------+-------------
