@@ -20,3 +20,6 @@ class Config:
     host: str = _config.get('CONNECTION', 'host')
     port: str = _config.get('CONNECTION', 'port')
     database: str = _config.get('CONNECTION', 'database')
+
+    # Set system settings.
+    out_dir: str = _config.get('SYSTEM', 'out_dir')

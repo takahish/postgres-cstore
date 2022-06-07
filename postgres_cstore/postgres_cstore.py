@@ -1,4 +1,5 @@
 from datetime import datetime
+from hashlib import md5
 import os
 import pandas as pd
 from postgres_cstore.config import Config
@@ -40,32 +41,45 @@ class PostgresCstore(object):
         cmd = "psql \"{uri}\" -f \"{sql_file}\""
         return Process.run(cmd=cmd.format(uri=self.psql_uri, sql_file=sql_file))
 
-    def ext(self, sql: str) -> pd.DataFrame:
-        """Extract data from output of sql as pandas.DataFrame.
-        :param sql: str
-        :return: pandas.DataFrame.
+    @staticmethod
+    def make_query_id() -> str:
         """
-        tmp_dir = os.path.join(os.path.expanduser("~"), ".postgres_cstore", "tmp", "undefined")
-        os.makedirs(tmp_dir, exist_ok=True)
-        tmp_file = os.path.join(tmp_dir,
-                                "{timestamp}.csv".format(timestamp=datetime.now().strftime('%Y%m%d%H%M%S')))
-        cmd = "psql \"{uri}\" -c \"{sql}\" -A --csv -o {tmp_file}"
-        _ = Process.run(cmd=cmd.format(uri=self.psql_uri, sql=sql, tmp_file=tmp_file))
-        return pd.read_csv(tmp_file)
+        :return: str.
+        """
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        return md5(timestamp.encode()).hexdigest()
 
-    def ext_from_file(self, sql_file: str) -> pd.DataFrame:
-        """Extract data from output of sql as pandas.DataFrame. The sql is written in file.
-        :param sql_file: str
+    def ext(self, sql: str, query_id: str) -> pd.DataFrame:
+        """Extract data from output of sql as pandas.DataFrame.
+        :param sql: str.
+        :param query_id: str.
         :return: pandas.DataFrame.
         """
-        tmp_dir = os.path.join(os.path.expanduser("~"), ".postgres_cstore", "tmp",
-                               os.path.splitext(os.path.basename(sql_file))[0])
-        os.makedirs(tmp_dir, exist_ok=True)
-        tmp_file = os.path.join(tmp_dir,
-                                "{timestamp}.csv".format(timestamp=datetime.now().strftime('%Y%m%d%H%M%S')))
-        cmd = "psql \"{uri}\" -f \"{sql_file}\" -A --csv -o {tmp_file}"
-        _ = Process.run(cmd=cmd.format(uri=self.psql_uri, sql_file=sql_file, tmp_file=tmp_file))
-        return pd.read_csv(tmp_file)
+        os.makedirs(self.config.out_dir, exist_ok=True)
+        out_file = os.path.join(self.config.out_dir, "{hash_id}.csv.gz".format(hash_id=query_id))
+        if os.path.isfile(out_file):
+            return pd.read_csv(out_file)
+        else:
+            tmp_file = os.path.join(self.config.out_dir, os.path.splitext(os.path.basename(out_file))[0])
+            cmd = "psql \"{uri}\" -c \"{sql}\" -A --csv -o {tmp_file} && gzip {tmp_file}"
+            _ = Process.run(cmd=cmd.format(uri=self.psql_uri, sql=sql, tmp_file=tmp_file))
+            return pd.read_csv(out_file, compression='gzip')
+
+    def ext_from_file(self, sql_file: str, query_id: str) -> pd.DataFrame:
+        """Extract data from output of sql as pandas.DataFrame. The sql is written in file.
+        :param sql_file: str.
+        :param query_id: str.
+        :return: pandas.DataFrame.
+        """
+        os.makedirs(self.config.out_dir, exist_ok=True)
+        out_file = os.path.join(self.config.out_dir, "{hash_id}.csv.gz".format(hash_id=query_id))
+        if os.path.isfile(out_file):
+            return pd.read_csv(out_file, compression='gzip')
+        else:
+            tmp_file = os.path.join(self.config.out_dir, os.path.splitext(os.path.basename(out_file))[0])
+            cmd = "psql \"{uri}\" -f \"{sql_file}\" -A --csv -o {tmp_file} && gzip {tmp_file}"
+            _ = Process.run(cmd=cmd.format(uri=self.psql_uri, sql_file=sql_file, tmp_file=tmp_file))
+            return pd.read_csv(out_file, compression='gzip')
 
     def load(self, csv_file: str, target_table: str) -> str:
         """ Then load method loads data to the table.

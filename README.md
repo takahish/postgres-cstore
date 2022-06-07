@@ -224,7 +224,8 @@ customer_id   | review_date | review_rating | product_id
 The second is an extraction of data from the output. The output is pandas.DataFrame object. The method doesn’t need a Postgres client library such as pycong2 (It only needs pandas).
 
 ```pycon
->>> df = ps.ext(sql="SELECT customer_id, review_date from customer_reviews LIMIT 10;")
+>>> first_query = ps.make_hash_id() # The hash_id identifies a query.
+>>> df = ps.ext(sql="SELECT customer_id, review_date from customer_reviews LIMIT 10;", query_id=first_query)
 >>> df
       customer_id review_date
 0   AE22YDHSBFYIP  1970-12-30
@@ -237,7 +238,8 @@ The second is an extraction of data from the output. The output is pandas.DataFr
 7  A1HPIDTM9SRBLP  1995-07-18
 8   ATVPDKIKX0DER  1995-07-18
 9   ATVPDKIKX0DER  1995-07-18
->>> df = ps.ext_from_file(sql_file="src/dml/find_customer_reviews.sql")
+>>> second_query = ps.make_hash_id()
+>>> df = ps.ext_from_file(sql_file="src/dml/find_customer_reviews.sql", query_id=second_query)
 >>> df
       customer_id review_date  review_rating  product_id
 0  A27T7HVDXA3K2A  1998-04-10              5  0399128964
@@ -247,15 +249,12 @@ The second is an extraction of data from the output. The output is pandas.DataFr
 4  A27T7HVDXA3K2A  1998-04-10              5  1559949570
 ```
 
-The methods exports a temporary file to ${HOME}/.postgres_cstore/tmp/*.
+The methods exports a temporary file to ./out/query/*.
 
 ```shell
-$ ls ${HOME}/.postgres_cstore/tmp
-find_customer_reviews   undefined
-$ ls /Users/takahiro/.postgres_cstore/tmp/undefined/
-20220530211006.csv
-$ ls /Users/takahiro/.postgres_cstore/tmp/find_customer_reviews/
-20220530210928.csv
+$ ls ./out/query/
+c843461198336e0137cc62cf60414391.csv.gz
+ce6c98b1ba8147a3cbde3abc128b01bd.csv.gz
 ```
 
 When loading data to a table, it has to create a foreign table in advance. Then load method loads data to the table.
