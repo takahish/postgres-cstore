@@ -5,7 +5,7 @@ SELECT
     ,review_rating
     ,product_id
 FROM
-    customer_reviews
+    test.customer_reviews
 WHERE
     customer_id = '{customer_id}'
     AND product_title LIKE '%Dune%'

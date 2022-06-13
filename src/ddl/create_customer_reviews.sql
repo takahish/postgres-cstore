@@ -1,5 +1,9 @@
+-- create schema
+CREATE SCHEMA IF NOT EXISTS test
+;
+
 -- create foreign table
-CREATE FOREIGN TABLE customer_reviews
+CREATE FOREIGN TABLE IF NOT EXISTS test.customer_reviews
 (
     customer_id TEXT,
     review_date DATE,
@@ -15,4 +19,5 @@ CREATE FOREIGN TABLE customer_reviews
     similar_product_ids CHAR(10)[]
 )
 SERVER cstore_server
-OPTIONS(compression 'pglz');
+OPTIONS(compression 'pglz')
+;

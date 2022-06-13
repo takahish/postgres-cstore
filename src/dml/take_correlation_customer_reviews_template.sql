@@ -4,7 +4,7 @@ SELECT
     ,round(avg(review_rating), 2) AS review_average
     ,count(*)
 FROM
-   customer_reviews
+   test.customer_reviews
 WHERE
     product_group = '{product_group}'
 GROUP BY
