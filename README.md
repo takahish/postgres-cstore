@@ -196,7 +196,7 @@ The First is an execution of SQL. The exec method returns an output as a string.
 >>> from postgres_cstore.config import Config
 >>> from postgres_cstore.postgres_cstore import PostgresCstore
 >>> ps = PostgresCstore(config=Config())  # The default configuration is the same as conf/system.ini
->>> print(ps.exec(sql="SELECT customer_id, review_date from customer_reviews LIMIT 10;"))  # Execute sql.
+>>> print(ps.exe(sql="SELECT customer_id, review_date from customer_reviews LIMIT 10;"))  # Execute sql.
 customer_id   | review_date 
 ----------------+-------------
  AE22YDHSBFYIP  | 1970-12-30
@@ -210,7 +210,16 @@ customer_id   | review_date
  ATVPDKIKX0DER  | 1995-07-18
  ATVPDKIKX0DER  | 1995-07-18
 (10 rows)
->>> print(ps.exec_from_file(sql_file="src/dml/find_customer_reviews.sql"))  # Execute sql that is written in a file.
+>>> print(ps.exe_fm_fil(sql_file="src/dml/find_customer_reviews.sql"))  # Execute sql that is written in a file.
+customer_id   | review_date | review_rating | product_id 
+----------------+-------------+---------------+------------
+ A27T7HVDXA3K2A | 1998-04-10  |             5 | 0399128964
+ A27T7HVDXA3K2A | 1998-04-10  |             5 | 044100590X
+ A27T7HVDXA3K2A | 1998-04-10  |             5 | 0441172717
+ A27T7HVDXA3K2A | 1998-04-10  |             5 | 0881036366
+ A27T7HVDXA3K2A | 1998-04-10  |             5 | 1559949570
+(5 rows)
+>>> print(ps.exe_fm_tpl(sql_template="src/dml/find_customer_reviews.sql", customer_id='A27T7HVDXA3K2A'))  # Execute sql that is written in a template with keyword arguments.
 customer_id   | review_date | review_rating | product_id 
 ----------------+-------------+---------------+------------
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 0399128964
@@ -224,8 +233,8 @@ customer_id   | review_date | review_rating | product_id
 The second is an extraction of data from the output. The output is pandas.DataFrame object. The method doesn’t need a Postgres client library such as pycong2 (It only needs pandas).
 
 ```pycon
->>> first_query = ps.make_hash_id() # The hash_id identifies a query.
->>> df = ps.ext(sql="SELECT customer_id, review_date from customer_reviews LIMIT 10;", query_id=first_query)
+>>> first_query = ps.make_query_id() # The hash_id identifies a query.
+>>> df = ps.ext(query_id=first_query, sql="SELECT customer_id, review_date from customer_reviews LIMIT 10;")
 >>> df
       customer_id review_date
 0   AE22YDHSBFYIP  1970-12-30
@@ -238,8 +247,17 @@ The second is an extraction of data from the output. The output is pandas.DataFr
 7  A1HPIDTM9SRBLP  1995-07-18
 8   ATVPDKIKX0DER  1995-07-18
 9   ATVPDKIKX0DER  1995-07-18
->>> second_query = ps.make_hash_id()
->>> df = ps.ext_from_file(sql_file="src/dml/find_customer_reviews.sql", query_id=second_query)
+>>> second_query = ps.make_query_id()
+>>> df = ps.ext_fm_fil(query_id=second_query, sql_file="src/dml/find_customer_reviews.sql")
+>>> df
+      customer_id review_date  review_rating  product_id
+0  A27T7HVDXA3K2A  1998-04-10              5  0399128964
+1  A27T7HVDXA3K2A  1998-04-10              5  044100590X
+2  A27T7HVDXA3K2A  1998-04-10              5  0441172717
+3  A27T7HVDXA3K2A  1998-04-10              5  0881036366
+4  A27T7HVDXA3K2A  1998-04-10              5  1559949570
+>>> third_query = ps.make_query_id()
+>>> df = ps.ext_fm_tpl(query_id=third_query, sql_template="src/dml/find_customer_reviews_template.sql", customer_id='A27T7HVDXA3K2A')
 >>> df
       customer_id review_date  review_rating  product_id
 0  A27T7HVDXA3K2A  1998-04-10              5  0399128964
@@ -255,6 +273,7 @@ The methods exports a temporary file to ./out/query/*.
 $ ls ./out/query/
 c843461198336e0137cc62cf60414391.csv.gz
 ce6c98b1ba8147a3cbde3abc128b01bd.csv.gz
+d0dbd0f44bde2f97301c232010d07263.csv.gz
 ```
 
 When loading data to a table, it has to create a foreign table in advance. Then load method loads data to the table.
