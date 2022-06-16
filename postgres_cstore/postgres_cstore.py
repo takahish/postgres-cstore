@@ -65,15 +65,17 @@ class PostgresCstore(object):
         :param sql: str.
         :return: pandas.DataFrame.
         """
-        os.makedirs(self.config.out_dir, exist_ok=True)
-        out_file = os.path.join(self.config.out_dir, "{query_id}.csv.gz".format(query_id=query_id))
-        if os.path.isfile(out_file):
-            return pd.read_csv(out_file)
+        query_dir = os.path.join(self.config.data_dir, 'query')
+        os.makedirs(query_dir, exist_ok=True)
+        query_file = os.path.join(query_dir, "{query_id}.csv.gz".format(query_id=query_id))
+
+        if os.path.isfile(query_file):
+            return pd.read_csv(query_file)
         else:
-            tmp_file = os.path.join(self.config.out_dir, os.path.splitext(os.path.basename(out_file))[0])
+            tmp_file = os.path.join(query_dir, os.path.splitext(os.path.basename(query_file))[0])
             cmd = "psql \"{uri}\" -c \"{sql}\" -A --csv -o {tmp_file} && gzip {tmp_file}"
             _ = Process.run(cmd=cmd.format(uri=self.psql_uri, sql=sql, tmp_file=tmp_file))
-            return pd.read_csv(out_file, compression='gzip')
+            return pd.read_csv(query_file, compression='gzip')
 
     def ext_fm_fil(self, query_id: str, sql_file: str) -> pd.DataFrame:
         """Extract data from output of sql as pandas.DataFrame. The sql is written in file.
@@ -81,15 +83,17 @@ class PostgresCstore(object):
         :param sql_file: str.
         :return: pandas.DataFrame.
         """
-        os.makedirs(self.config.out_dir, exist_ok=True)
-        out_file = os.path.join(self.config.out_dir, "{query_id}.csv.gz".format(query_id=query_id))
-        if os.path.isfile(out_file):
-            return pd.read_csv(out_file, compression='gzip')
+        query_dir = os.path.join(self.config.data_dir, 'query')
+        os.makedirs(query_dir, exist_ok=True)
+        query_file = os.path.join(query_dir, "{query_id}.csv.gz".format(query_id=query_id))
+
+        if os.path.isfile(query_file):
+            return pd.read_csv(query_file, compression='gzip')
         else:
-            tmp_file = os.path.join(self.config.out_dir, os.path.splitext(os.path.basename(out_file))[0])
+            tmp_file = os.path.join(query_dir, os.path.splitext(os.path.basename(query_file))[0])
             cmd = "psql \"{uri}\" -f \"{sql_file}\" -A --csv -o {tmp_file} && gzip {tmp_file}"
             _ = Process.run(cmd=cmd.format(uri=self.psql_uri, sql_file=sql_file, tmp_file=tmp_file))
-            return pd.read_csv(out_file, compression='gzip')
+            return pd.read_csv(query_file, compression='gzip')
 
     def ext_fm_tpl(self, query_id: str, sql_template: str, **kwargs: dict) -> pd.DataFrame:
         """Extract data from output of sql as pandas.DataFrame.

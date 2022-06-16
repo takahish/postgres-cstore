@@ -22,4 +22,5 @@ class Config:
     database: str = _config.get('CONNECTION', 'database')
 
     # Set system settings.
-    out_dir: str = _config.get('SYSTEM', 'out_dir')
+    data_dir: str = _config.get('SYSTEM', 'data_dir')
+    temporary_dir: str = _config.get('SYSTEM', 'temporary_dir')

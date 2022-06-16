@@ -269,13 +269,13 @@ The second is an extraction of data from the output. The output is pandas.DataFr
 4  A27T7HVDXA3K2A  1998-04-10              5  1559949570
 ```
 
-The methods exports a temporary file to ./out/query/*.
+The methods exports a temporary file to ./data/query/*.
 
 ```shell
-$ ls ./out/query/
-1fd82149efd613fda0da246f53d15eb5.csv.gz
-206096a48ce64bbb77edb02d9c247096.csv.gz
-636715c0a5ec2d4cd9202e3930bf9bac.csv.gz
+$ ls data/query/
+20584748f65f7080ae40a0af8a8861b8.csv.gz
+29c4b327a2f5ce41fa0e9e590fff9757.csv.gz
+59aa3a9e4d4f42058f4538fdabcf65ff.csv.gz
 ```
 
 When loading data to a table, it has to create a foreign table in advance. Then load method loads data to the table.
