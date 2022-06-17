@@ -236,7 +236,7 @@ The second is an extraction of data from the output. The output is pandas.DataFr
 
 ```pycon
 >>> first_query = ps.make_query_id() # The hash_id identifies a query.
->>> df = ps.ext(query_id=first_query, sql="SELECT customer_id, review_date from test.customer_reviews LIMIT 10;")
+>>> df = ps.ext(sql="SELECT customer_id, review_date from test.customer_reviews LIMIT 10;", query_id=first_query)
 >>> df
       customer_id review_date
 0   AE22YDHSBFYIP  1970-12-30
@@ -250,7 +250,7 @@ The second is an extraction of data from the output. The output is pandas.DataFr
 8   ATVPDKIKX0DER  1995-07-18
 9   ATVPDKIKX0DER  1995-07-18
 >>> second_query = ps.make_query_id()
->>> df = ps.ext_fm_fil(query_id=second_query, sql_file="src/dml/find_customer_reviews.sql")
+>>> df = ps.ext_fm_fil(sql_file="src/dml/find_customer_reviews.sql", query_id=second_query)
 >>> df
       customer_id review_date  review_rating  product_id
 0  A27T7HVDXA3K2A  1998-04-10              5  0399128964
@@ -259,7 +259,7 @@ The second is an extraction of data from the output. The output is pandas.DataFr
 3  A27T7HVDXA3K2A  1998-04-10              5  0881036366
 4  A27T7HVDXA3K2A  1998-04-10              5  1559949570
 >>> third_query = ps.make_query_id()
->>> df = ps.ext_fm_tpl(query_id=third_query, sql_template="src/dml/find_customer_reviews_template.sql", customer_id='A27T7HVDXA3K2A')
+>>> df = ps.ext_fm_tpl(sql_template="src/dml/find_customer_reviews_template.sql", placeholder={'customer_id': 'A27T7HVDXA3K2A'}, query_id=third_query)
 >>> df
       customer_id review_date  review_rating  product_id
 0  A27T7HVDXA3K2A  1998-04-10              5  0399128964
@@ -269,13 +269,16 @@ The second is an extraction of data from the output. The output is pandas.DataFr
 4  A27T7HVDXA3K2A  1998-04-10              5  1559949570
 ```
 
-The methods exports a temporary file to ./data/query/*.
+The methods exports a temporary file to ./data/query/*. The query_id.csv.gz is a data file and the query_id.json is a meta file.
 
 ```shell
 $ ls data/query/
-20584748f65f7080ae40a0af8a8861b8.csv.gz
-29c4b327a2f5ce41fa0e9e590fff9757.csv.gz
-59aa3a9e4d4f42058f4538fdabcf65ff.csv.gz
+2360e089ecbab90b820487ad5eb44ebb.csv.gz
+2360e089ecbab90b820487ad5eb44ebb.json
+2dab25635e049fe04a2fcdf0caff9573.csv.gz
+2dab25635e049fe04a2fcdf0caff9573.json
+a25d09fd8d5fcbebf271e00d49c0ab09.csv.gz
+a25d09fd8d5fcbebf271e00d49c0ab09.json
 ```
 
 When loading data to a table, it has to create a foreign table in advance. Then load method loads data to the table.
