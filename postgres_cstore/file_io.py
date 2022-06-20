@@ -1,6 +1,8 @@
 import glob
 import os
+
 import pandas as pd
+
 from postgres_cstore.config import Config
 
 
@@ -44,14 +46,14 @@ class FileIO(object):
         # Concatenate all dataframes.
         return pd.concat(universe, sort=False)
 
-    def cat_dat(self, pattern, temporary_file_name, **kwargs):
-        """Concatenate all data in a file list. The data is saved as a temporary file.
-        :param pattern: str. A pattern extracted from self.conf.data_dir.
+    def csv_dat(self, data_frame: pd.DataFrame, temporary_file_name: str, **kwargs):
+        """Save a data_frame in a CSV file. The CSV is a temporary file.
+        :param data_frame: pd.DataFrame. A data_frame to be saved as a CSV file.
         :param temporary_file_name: str. Temporary file name saved in the self.conf.temporary_dir.
-        :param kwargs: dict. Keyword arguments passed to pd.read_csv.
+        :param kwargs: dict. Keyword arguments passed to pd.DataFrame.to_csv.
         :return: str.
         """
         os.makedirs(self.config.temporary_dir, exist_ok=True)
         temporary_file_path = os.path.join(self.config.temporary_dir, temporary_file_name)
-        self.ext_dat(pattern, **kwargs).to_csv(temporary_file_path)
+        data_frame.to_csv(temporary_file_path, **kwargs)
         return temporary_file_path
