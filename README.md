@@ -221,7 +221,7 @@ customer_id   | review_date | review_rating | product_id
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 0881036366
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 1559949570
 (5 rows)
->>> print(ps.exe_fm_tpl(sql_template="src/dml/find_customer_reviews_template.sql", customer_id='A27T7HVDXA3K2A'))  # Execute sql that is written in a template with keyword arguments.
+>>> print(ps.exe_fm_tpl(sql_template="src/dml/find_customer_reviews_template.sql", placeholder={'customer_id': 'A27T7HVDXA3K2A'}))  # Execute sql that is written in a template with keyword arguments.
 customer_id   | review_date | review_rating | product_id 
 ----------------+-------------+---------------+------------
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 0399128964

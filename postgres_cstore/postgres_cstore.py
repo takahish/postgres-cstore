@@ -1,9 +1,11 @@
+import json
+import os
 from collections import OrderedDict
 from datetime import datetime
 from hashlib import md5
-import json
-import os
+
 import pandas as pd
+
 from postgres_cstore.config import Config
 from postgres_cstore.process import Process
 
@@ -43,14 +45,14 @@ class PostgresCstore(object):
         with open(sql_file, 'r') as sql:
             return self.exe(sql=sql.read())
 
-    def exe_fm_tpl(self, sql_template: str, **kwargs: dict) -> str:
+    def exe_fm_tpl(self, sql_template: str, placeholder: dict) -> str:
         """Execute sql that is written in a template with keyword arguments.
         :param sql_template: str.
-        :param kwargs: dict.
+        :param placeholder: dict.
         :return: str
         """
         with open(sql_template, 'r') as tpl:
-            sql = tpl.read().format(**kwargs)
+            sql = tpl.read().format(**placeholder)
             return self.exe(sql=sql)
 
     @staticmethod
