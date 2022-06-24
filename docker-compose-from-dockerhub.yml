@@ -1,0 +1,13 @@
+version: "3"
+services:
+  postgres-cstore:
+    image: takahish/postgres-cstore:12.11
+    restart: always
+    environment:
+      POSTGRES_USER: dwhuser
+      POSTGRES_PASSWORD: dwhuser
+      POSTGRES_DB: dwhuser
+    ports:
+      - 5432:5432
+    volumes:
+      - ./warehouse:/var/lib/postgresql/data
