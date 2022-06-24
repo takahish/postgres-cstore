@@ -15,14 +15,7 @@ A docker image and container of PostgreSQL with the columnar store. The data use
     
 ## Building steps
 
-### Pull image from docker hub
-
-```shell
-# Pull image from docker hub
-$ docker pull takahish/postgres-cstore:12.11  # latest version is 12.11
-```
-
-#### ... or manually build image
+### Build image from docker-compose
 
 ```shell
 # Clone this repository.
@@ -31,11 +24,8 @@ $ git clone https://github.com/takahish/postgres-cstore.git
 # Update submodules.
 $ git submodule update --init --recursive
 
-# Build persistent-postgres image.
-$ docker build -t postgres-cstore-base:12.11 lib/postgres/12/bullseye
-
-# Build postgres-persistnece-cstore image (This image has columner store).
-$ docker build -t postgres-cstore:12.11 .
+# Build postgres-cstore image.
+$ docker-compose build
 ```
 
 ### Run container
@@ -43,12 +33,14 @@ $ docker build -t postgres-cstore:12.11 .
 ```shell
 # Detach posgres-cstore.
 # If you build image manually, You change the image name to postgres-cstore:12.11. 
-$ docker run --name postgres-cstore -p 5432:5432 -e POSTGRES_USER=dwhuser -e POSTGRES_PASSWORD=dwhuser -v warehouse:/var/lib/postgresql/data -d takahish/postgres-cstore:12.11
-baec3761b49aaf73abbd34cc8b21f903af72c30c8c71f2ea9f89feff0ccae78f
+$ docker-compose up -d
+Creating network "postgres-cstore_default" with the default driver
+Creating postgres-cstore_postgres_1        ... done
+Creating postgres-cstore_postgres-cstore_1 ... done
 
 # Here is psql connection settings.
-export PGUSER=dwhuser
-export PGPASSWORD=dwhuser
+$ export PGUSER=dwhuser
+$ export PGPASSWORD=dwhuser
 
 # Connect persistent-postgres-cstore.
 # Prerequisite is to install postgresql for using psql.
@@ -84,6 +76,7 @@ psql (13.1, server 12.11 (Debian 12.11-1.pgdg110+1))
 Type "help" for help.
 
 dwhuser=# \copy test.customer_reviews from 'data/customer_reviews_1998.csv' with csv
+
 COPY 589859
 dwhuser=# \copy test.customer_reviews from 'data/customer_reviews_1999.csv' with csv
 COPY 1172645
@@ -117,29 +110,24 @@ $ psql -h localhost -d dwhuser -f src/dml/take_correlation_customer_reviews.sql
 
 ```shell
 # Export volume to persist data.
-$ docker run --rm --volumes-from postgres-cstore -v $(pwd):/backup debian:latest tar zcvf /backup/warehouse.tar.gz /var/lib/postgresql/data
+$ tar -jcvf warehouse.tar.bz2 warehouse
 ```
 
 ```shell
-# Pull image from docker hub
-$ docker pull takahish/postgres-cstore:12.11  # latest version is 12.11
+# Buid image from docker-compose
+$ git clone https://github.com/takahish/postgres-cstore.git
+$ git submodule update --init --recursive
+$ docker-compose build
 
 # Run container.
-# If you build image manually, You change the image name to postgres-cstore:12.11. 
-$ docker run --name postgres-cstore -p 5432:5432 -e POSTGRES_USER=dwhuser -e POSTGRES_PASSWORD=dwhuser -v warehouse:/var/lib/postgresql/data -d takahish/postgres-cstore:12
+$ docker-compose up -d
 
-# Create foreign server.
-$ psql -h localhost -d dwhuser -f src/ddl/create_cstore_fdw.sql 
-CREATE EXTENSION
-CREATE SERVER
-
-# Difine tables.
-$ psql -h localhost -d dwhuser -f src/ddl/create_customer_reviews.sql
-CREATE SCHEMA
-CREATE FOREIGN TABLE
+# Here is psql connection settings.
+$ export PGUSER=dwhuser
+$ export PGPASSWORD=dwhuser
 
 # Restore volume.
-$ docker run --volumes-from postgres-cstore -v $(pwd):/backup debian:latest tar zxvf /backup/warehouse.tar.gz -C /
+$ tar -jxvf warehouse.tar.bz2 
 
 $ psql -h localhost -U dwhuser -d dwhuser -f src/dml/find_customer_reviews.sql
   customer_id   | review_date | review_rating | product_id 

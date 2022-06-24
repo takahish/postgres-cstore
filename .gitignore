@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# The warehouse of postgres-cstore
+warehouse
+
+# The query results of postgres-cstore
+data/query
+
+# The temporary of postgres-cstore
+tmp

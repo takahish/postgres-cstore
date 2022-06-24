@@ -1,7 +1,5 @@
 # PostreSQL version is 12 (stable at 2022/05/17).
-# postgres-persistence that is patched make thier data persistent.
-# See also, lib/postgres and patch/postgres_11_Dockerfile.patch
-FROM postgres-cstore-base:12.11
+FROM postgres:12.11
 
 LABEL maintainer "Hiro Ishikawa <takahiro.ishikawa@cons.jp>"
 

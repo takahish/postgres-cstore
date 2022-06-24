@@ -1,0 +1,21 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:12.11
+    build:
+      context: lib/postgres/12/bullseye
+      dockerfile: Dockerfile
+  postgres-cstore:
+    image: postgres-cstore:12.11
+    restart: always
+    build:
+     context: ./
+     dockerfile: Dockerfile
+    environment:
+      POSTGRES_USER: dwhuser
+      POSTGRES_PASSWORD: dwhuser
+      POSTGRES_DB: dwhuser
+    ports:
+      - 5432:5432
+    volumes:
+      - ./warehouse:/var/lib/postgresql/data
