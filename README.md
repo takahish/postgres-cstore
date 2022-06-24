@@ -34,9 +34,6 @@ $ docker-compose build
 # Detach posgres-cstore.
 # If you build image manually, You change the image name to postgres-cstore:12.11. 
 $ docker-compose up -d
-Creating network "postgres-cstore_default" with the default driver
-Creating postgres-cstore_postgres_1        ... done
-Creating postgres-cstore_postgres-cstore_1 ... done
 
 # Here is psql connection settings.
 $ export PGUSER=dwhuser
