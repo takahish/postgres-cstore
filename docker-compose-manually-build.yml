@@ -6,7 +6,7 @@ services:
       context: lib/postgres/12/bullseye
       dockerfile: Dockerfile
   postgres-cstore:
-    image: postgres-cstore:12.11
+    image: postgres-cstore:12.11.1
     restart: always
     build:
      context: ./

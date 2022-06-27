@@ -1,4 +1,4 @@
-# PostreSQL version is 12 (stable at 2022/05/17).
+# PostreSQL version is 12.11.
 FROM postgres:12.11
 
 LABEL maintainer "Hiro Ishikawa <takahiro.ishikawa@cons.jp>"

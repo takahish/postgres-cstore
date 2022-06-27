@@ -1,7 +1,7 @@
 version: "3"
 services:
   postgres-cstore:
-    image: takahish/postgres-cstore:12.11
+    image: takahish/postgres-cstore:12.11.1
     restart: always
     environment:
       POSTGRES_USER: dwhuser
