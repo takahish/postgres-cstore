@@ -17,6 +17,8 @@ A docker image and container of PostgreSQL with the columnar store. The data use
 
 ### Build image from docker-compose
 
+You don't need to build the image if you use the image from the docker hub. But you can build the image manually. Here are the build steps.
+
 ```shell
 # Clone this repository.
 $ git clone https://github.com/takahish/postgres-cstore.git
@@ -25,15 +27,19 @@ $ git clone https://github.com/takahish/postgres-cstore.git
 $ git submodule update --init --recursive
 
 # Build postgres-cstore image.
-$ docker-compose build
+$ docker-compose -f docker-compose-manually-build.yml build
 ```
 
 ### Run container
 
 ```shell
 # Detach posgres-cstore.
-# If you build image manually, You change the image name to postgres-cstore:12.11. 
-$ docker-compose up -d
+# Here is the commands if you build image manually.
+$ docker-compose -f docker-compose-manually-build.yml up -d
+
+# ... or you can run the container directly from the image from the docker hub.
+# After this step, I will describe the topics using the image from the docker hub.
+$ docker-compose -f docker-compose-from-dockerhub.yml up -d
 
 # Here is psql connection settings.
 $ export PGUSER=dwhuser
@@ -111,13 +117,8 @@ $ tar -jcvf warehouse.tar.bz2 warehouse
 ```
 
 ```shell
-# Buid image from docker-compose
-$ git clone https://github.com/takahish/postgres-cstore.git
-$ git submodule update --init --recursive
-$ docker-compose build
-
 # Run container.
-$ docker-compose up -d
+$ docker-compose -f docker-compose-from-dockerhub.yml up -d
 
 # Here is psql connection settings.
 $ export PGUSER=dwhuser
