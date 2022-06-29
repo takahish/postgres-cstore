@@ -151,15 +151,12 @@ class PostgresCstore(object):
             sql = tpl.read().format(**placeholder)
             return self.ext(query_id=query_id, sql=sql, **kwargs)
 
-    def load(self, csv_file: str, schema_name: str, table_name) -> str:
+    def load(self, csv_file: str, schema_name: str, table_name: str) -> str:
         """ Then load method loads data to the table.
         :param csv_file: str.
         :param schema_name: str.
         :param table_name: str.
         :return: str.
         """
-        cmd = "psql \"{uri}\" -c \"{meta}\""
         meta = "\\copy {schema_name}.{table_name} from '{csv_file}' with csv"
-        return Process.run(cmd.format(uri=self.psql_uri,
-                                      meta=meta.format(schema_name=schema_name, table_name=table_name,
-                                                       csv_file=csv_file)))
+        return self.exe(sql=meta.format(schema_name=schema_name, table_name=table_name, csv_file=csv_file))
