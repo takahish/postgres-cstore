@@ -63,12 +63,12 @@ dwhuser=# \q
 $ data/download_customer_reviews.sh
 
 # Create foreign server.
-$ psql -h localhost -d dwhuser -f src/ddl/create_cstore_fdw.sql 
+$ psql -h localhost -d dwhuser -f src/ddl/cstore_fdw.sql 
 CREATE EXTENSION
 CREATE SERVER
 
 # Difine tables.
-$ psql -h localhost -d dwhuser -f src/ddl/create_customer_reviews.sql
+$ psql -h localhost -d dwhuser -f src/ddl/test_customer_reviews.sql
 CREATE SCHEMA
 CREATE FOREIGN TABLE
 
@@ -270,7 +270,7 @@ a25d09fd8d5fcbebf271e00d49c0ab09.json
 When loading data to a table, it has to create a foreign table in advance. Then load method loads data to the table.
 
 ```pycon
->>> print(ps.exe_fm_fil(sql_file="src/ddl/create_customer_reviews.sql"))
+>>> print(ps.exe_fm_fil(sql_file="src/ddl/test_customer_reviews.sql"))
 CREATE SCHEMA
 CREATE FOREIGN TABLE
 >>> print(ps.load(csv_file="data/customer_reviews_1998.csv", schema_name="test", table_name="customer_reviews"))
