@@ -15,7 +15,7 @@ class FileIO(object):
         """
         self.config = config
 
-    def lst_fil(self, pattern):
+    def list_file(self, pattern):
         """List all files matching a pattern from self.conf.data_dir.
         :param pattern: str. A pattern listed from self.conf.data.dir.
         :return: (list, int).
@@ -25,7 +25,7 @@ class FileIO(object):
             files = files + glob.glob(os.path.join(root, pattern))
         return files, len(files)
 
-    def ext_dat(self, pattern: str, **kwargs) -> pd.DataFrame:
+    def data_load(self, pattern: str, **kwargs) -> pd.DataFrame:
         """Extract all data in a file list. The file in the list is matching a pattern,
         and read from self.conf.data_dir.
         :param pattern: str. A pattern extracted from self.conf.data_dir.
@@ -33,7 +33,7 @@ class FileIO(object):
         :return: pd.DataFrame.
         """
         # List all files matching a pattern from self.conf.data_dir
-        files, length = self.lst_fil(pattern=pattern)
+        files, length = self.list_file(pattern=pattern)
 
         # Iterate over files.
         universe = []
@@ -46,7 +46,7 @@ class FileIO(object):
         # Concatenate all dataframes.
         return pd.concat(universe, sort=False)
 
-    def csv_dat(self, data_frame: pd.DataFrame, temporary_file_name: str, **kwargs):
+    def data_dump(self, data_frame: pd.DataFrame, temporary_file_name: str, **kwargs):
         """Save a data_frame in a CSV file. The CSV is a temporary file.
         :param data_frame: pd.DataFrame. A data_frame to be saved as a CSV file.
         :param temporary_file_name: str. Temporary file name saved in the self.conf.temporary_dir.

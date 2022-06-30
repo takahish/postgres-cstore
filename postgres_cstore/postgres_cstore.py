@@ -29,7 +29,7 @@ class PostgresCstore(object):
             database=self.config.database
         )
 
-    def exe(self, sql: str) -> str:
+    def execute(self, sql: str) -> str:
         """Execute sql.
         :param sql: str.
         :return: str.
@@ -37,15 +37,15 @@ class PostgresCstore(object):
         cmd = "psql \"{uri}\" -c \"{sql}\""
         return Process.run(cmd=cmd.format(uri=self.psql_uri, sql=sql))
 
-    def exe_fm_fil(self, sql_file: str) -> str:
+    def execute_from_file(self, sql_file: str) -> str:
         """Execute sql that is written in file.
         :param sql_file: str.
         :return: str.
         """
         with open(sql_file, 'r') as sql:
-            return self.exe(sql=sql.read())
+            return self.execute(sql=sql.read())
 
-    def exe_fm_tpl(self, sql_template: str, placeholder: dict) -> str:
+    def execute_from_template(self, sql_template: str, placeholder: dict) -> str:
         """Execute sql that is written in a template with keyword arguments.
         :param sql_template: str.
         :param placeholder: dict.
@@ -53,7 +53,7 @@ class PostgresCstore(object):
         """
         with open(sql_template, 'r') as tpl:
             sql = tpl.read().format(**placeholder)
-            return self.exe(sql=sql)
+            return self.execute(sql=sql)
 
     @staticmethod
     def make_query_id() -> str:
@@ -84,7 +84,7 @@ class PostgresCstore(object):
             dtype = json.load(f, object_pairs_hook=OrderedDict)
         return dtype
 
-    def ext(self, sql: str, query_id: str, **kwargs) -> pd.DataFrame:
+    def extract(self, sql: str, query_id: str, **kwargs) -> pd.DataFrame:
         """Extract data from output of sql as pandas.DataFrame.
         :param sql: str.
         :param query_id: str.
@@ -129,16 +129,16 @@ class PostgresCstore(object):
             self.json_dump(meta_file, dtype)
             return df
 
-    def ext_fm_fil(self, sql_file: str, query_id: str, **kwargs) -> pd.DataFrame:
+    def extract_from_file(self, sql_file: str, query_id: str, **kwargs) -> pd.DataFrame:
         """Extract data from output of sql as pandas.DataFrame. The sql is written in file.
         :param sql_file: str.
         :param query_id: str.
         :return: pandas.DataFrame.
         """
         with open(sql_file, 'r') as sql:
-            return self.ext(query_id=query_id, sql=sql.read(), **kwargs)
+            return self.extract(query_id=query_id, sql=sql.read(), **kwargs)
 
-    def ext_fm_tpl(self, sql_template: str, placeholder: dict, query_id: str, **kwargs: dict) -> pd.DataFrame:
+    def extract_from_template(self, sql_template: str, placeholder: dict, query_id: str, **kwargs: dict) -> pd.DataFrame:
         """Extract data from output of sql as pandas.DataFrame.
         The sql is written in template with keyword arguments.
         :param sql_template: str.
@@ -149,7 +149,7 @@ class PostgresCstore(object):
         """
         with open(sql_template, 'r') as tpl:
             sql = tpl.read().format(**placeholder)
-            return self.ext(query_id=query_id, sql=sql, **kwargs)
+            return self.extract(query_id=query_id, sql=sql, **kwargs)
 
     def load(self, csv_file: str, schema_name: str, table_name: str) -> str:
         """ Then load method loads data to the table.
@@ -159,4 +159,4 @@ class PostgresCstore(object):
         :return: str.
         """
         meta = "\\copy {schema_name}.{table_name} from '{csv_file}' with csv"
-        return self.exe(sql=meta.format(schema_name=schema_name, table_name=table_name, csv_file=csv_file))
+        return self.execute(sql=meta.format(schema_name=schema_name, table_name=table_name, csv_file=csv_file))

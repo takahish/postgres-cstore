@@ -184,7 +184,7 @@ The First is an execution of SQL. The exec method returns an output as a string.
 >>> from postgres_cstore.config import Config
 >>> from postgres_cstore.postgres_cstore import PostgresCstore
 >>> ps = PostgresCstore(config=Config())  # The default configuration is the same as conf/system.ini
->>> print(ps.exe(sql="SELECT customer_id, review_date from test.customer_reviews LIMIT 10;"))  # Execute sql.
+>>> print(ps.execute(sql="SELECT customer_id, review_date from test.customer_reviews LIMIT 10;"))  # Execute sql.
 customer_id   | review_date 
 ----------------+-------------
  AE22YDHSBFYIP  | 1970-12-30
@@ -198,7 +198,7 @@ customer_id   | review_date
  ATVPDKIKX0DER  | 1995-07-18
  ATVPDKIKX0DER  | 1995-07-18
 (10 rows)
->>> print(ps.exe_fm_fil(sql_file="src/dml/find_customer_reviews.sql"))  # Execute sql that is written in a file.
+>>> print(ps.execute_from_file(sql_file="src/dml/find_customer_reviews.sql"))  # Execute sql that is written in a file.
 customer_id   | review_date | review_rating | product_id 
 ----------------+-------------+---------------+------------
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 0399128964
@@ -207,7 +207,7 @@ customer_id   | review_date | review_rating | product_id
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 0881036366
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 1559949570
 (5 rows)
->>> print(ps.exe_fm_tpl(sql_template="src/dml/find_customer_reviews_template.sql", placeholder={'customer_id': 'A27T7HVDXA3K2A'}))  # Execute sql that is written in a template with keyword arguments.
+>>> print(ps.execute_from_template(sql_template="src/dml/find_customer_reviews_template.sql", placeholder={'customer_id': 'A27T7HVDXA3K2A'}))  # Execute sql that is written in a template with keyword arguments.
 customer_id   | review_date | review_rating | product_id 
 ----------------+-------------+---------------+------------
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 0399128964
@@ -222,7 +222,7 @@ The second is an extraction of data from the output. The output is pandas.DataFr
 
 ```pycon
 >>> first_query = ps.make_query_id() # The hash_id identifies a query.
->>> df = ps.ext(sql="SELECT customer_id, review_date from test.customer_reviews LIMIT 10;", query_id=first_query)
+>>> df = ps.extract(sql="SELECT customer_id, review_date from test.customer_reviews LIMIT 10;", query_id=first_query)
 >>> df
       customer_id review_date
 0   AE22YDHSBFYIP  1970-12-30
@@ -236,7 +236,7 @@ The second is an extraction of data from the output. The output is pandas.DataFr
 8   ATVPDKIKX0DER  1995-07-18
 9   ATVPDKIKX0DER  1995-07-18
 >>> second_query = ps.make_query_id()
->>> df = ps.ext_fm_fil(sql_file="src/dml/find_customer_reviews.sql", query_id=second_query)
+>>> df = ps.extract_from_file(sql_file="src/dml/find_customer_reviews.sql", query_id=second_query)
 >>> df
       customer_id review_date  review_rating  product_id
 0  A27T7HVDXA3K2A  1998-04-10              5  0399128964
@@ -245,7 +245,7 @@ The second is an extraction of data from the output. The output is pandas.DataFr
 3  A27T7HVDXA3K2A  1998-04-10              5  0881036366
 4  A27T7HVDXA3K2A  1998-04-10              5  1559949570
 >>> third_query = ps.make_query_id()
->>> df = ps.ext_fm_tpl(sql_template="src/dml/find_customer_reviews_template.sql", placeholder={'customer_id': 'A27T7HVDXA3K2A'}, query_id=third_query)
+>>> df = ps.extract_from_template(sql_template="src/dml/find_customer_reviews_template.sql", placeholder={'customer_id': 'A27T7HVDXA3K2A'}, query_id=third_query)
 >>> df
       customer_id review_date  review_rating  product_id
 0  A27T7HVDXA3K2A  1998-04-10              5  0399128964
@@ -270,7 +270,7 @@ a25d09fd8d5fcbebf271e00d49c0ab09.json
 When loading data to a table, it has to create a foreign table in advance. Then load method loads data to the table.
 
 ```pycon
->>> print(ps.exe_fm_fil(sql_file="src/ddl/test_customer_reviews.sql"))
+>>> print(ps.execute_from_file(sql_file="src/ddl/test_customer_reviews.sql"))
 CREATE SCHEMA
 CREATE FOREIGN TABLE
 >>> print(ps.load(csv_file="data/customer_reviews_1998.csv", schema_name="test", table_name="customer_reviews"))
