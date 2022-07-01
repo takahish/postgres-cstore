@@ -30,21 +30,22 @@ class FileIO(object):
         and read from self.conf.data_dir.
         :param pattern: str. A pattern extracted from self.conf.data_dir.
         :param kwargs: dict. Keyword arguments passed to pd.read_csv.
-        :return: pd.DataFrame.
+        :return: (pd.DataFrame, list).
         """
         # List all files matching a pattern from self.conf.data_dir
         files, length = self.list_file(pattern=pattern)
 
         # Iterate over files.
         universe = []
+        processed_file_list = []
         for i, f in enumerate(files):
             # Extract data from csv files and append pandas.Dataframe.
             universe.append(pd.read_csv(f, **kwargs))
-            # Print progress.
-            print("{current}/{length} {file} done.".format(current=str(i+1), length=length, file=f))
+            # Append file to processed_file_list.
+            processed_file_list.append(f)
 
         # Concatenate all dataframes.
-        return pd.concat(universe, sort=False)
+        return (pd.concat(universe, sort=False), processed_file_list)
 
     def data_dump(self, data_frame: pd.DataFrame, temporary_file_name: str, **kwargs):
         """Save a data_frame in a CSV file. The CSV is a temporary file.

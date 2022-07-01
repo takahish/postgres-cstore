@@ -158,5 +158,6 @@ class PostgresCstore(object):
         :param table_name: str.
         :return: str.
         """
-        meta = "\\copy {schema_name}.{table_name} from '{csv_file}' with csv"
-        return self.execute(sql=meta.format(schema_name=schema_name, table_name=table_name, csv_file=csv_file))
+        csv_path = os.path.join(self.config.temporary_dir, csv_file)
+        meta = "\\copy {schema_name}.{table_name} from '{csv_path}' with csv"
+        return self.execute(sql=meta.format(schema_name=schema_name, table_name=table_name, csv_path=csv_path))
