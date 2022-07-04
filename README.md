@@ -28,7 +28,7 @@ $ git clone https://github.com/takahish/postgres-cstore.git
 $ git submodule update --init --recursive
 
 # Build postgres-cstore image.
-$ docker-compose -f docker-compose-manually-build.yml build
+$ docker-compose -f docker-compose-for-build.yml build
 ```
 
 ### Run container
@@ -36,11 +36,11 @@ $ docker-compose -f docker-compose-manually-build.yml build
 ```shell
 # Detach posgres-cstore.
 # Here is the commands if you build image manually.
-$ docker-compose -f docker-compose-manually-build.yml up -d
+$ docker-compose -f docker-compose-for-build.yml up -d
 
 # ... or you can run the container directly from the image from the docker hub.
 # After this step, I will describe the topics using the image from the docker hub.
-$ docker-compose -f docker-compose-from-dockerhub.yml up -d
+$ docker-compose up -d
 
 # Here is psql connection settings.
 $ export PGUSER=dwhuser
@@ -119,7 +119,7 @@ $ tar -jcvf warehouse.tar.bz2 warehouse
 
 ```shell
 # Run container.
-$ docker-compose -f docker-compose-from-dockerhub.yml up -d
+$ docker-compose -f docker-compose.yml up -d
 
 # Here is psql connection settings.
 $ export PGUSER=dwhuser
