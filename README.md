@@ -5,7 +5,7 @@ A docker image and container of PostgreSQL with the columnar store. The data use
 ## Table of content
 
 - [Bulding steps](#Building-steps)
-    - [Pull image from docker hub](#Build-image)
+    - [Build image from docker-compose](#Build-image-from-docker-compose)
     - [Run container](#Run-container)
     - [Load data](#Load-data)
     - [Export volume](#Export-volume)
