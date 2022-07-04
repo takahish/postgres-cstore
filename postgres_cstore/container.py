@@ -1,5 +1,5 @@
-from postgres_cstore.config import Config
-from postgres_cstore.process import Process
+from .config import Config
+from .process import Process
 
 
 class Container(object):

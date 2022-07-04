@@ -1,13 +1,11 @@
 from collections import OrderedDict
 
-from postgres_cstore.config import Config
-from postgres_cstore.file_io import FileIO
-from postgres_cstore.postgres_cstore import PostgresCstore
+from postgres_cstore import Config, FileIO, Client
 
-# Make an instance of FileIO and PostgresCstore.
+# Make an instance of FileIO and Client.
 config = Config()
 io = FileIO(config)
-ps = PostgresCstore(config)
+ps = Client(config)
 
 # Define data types of the raw data. dtype is OrderedDict of a pair of column name and data type.
 dtype = OrderedDict([

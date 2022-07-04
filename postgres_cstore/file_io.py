@@ -3,7 +3,7 @@ import os
 
 import pandas as pd
 
-from postgres_cstore.config import Config
+from .config import Config
 
 
 class FileIO(object):

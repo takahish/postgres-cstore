@@ -155,8 +155,7 @@ $ psql -h localhost -d dwhuser -f src/dml/take_correlation_customer_reviews.sql
 ### Manipulate container
 
 ```pycon
->>> from postgres_cstore.config import Config
->>> from postgres_cstore.container import Container
+>>> from postgres_cstore import Config, Container
 >>> c = Container(config=Config())  # The default configuration is the same as conf/system.ini
 >>> c.run()  # Run container from image and start container.
 >>> c.run()  # An error occurs if the container already exists. 
@@ -182,9 +181,8 @@ See 'docker run --help'.
 The First is an execution of SQL. The exec method returns an output as a string.
 
 ```pycon
->>> from postgres_cstore.config import Config
->>> from postgres_cstore.postgres_cstore import PostgresCstore
->>> ps = PostgresCstore(config=Config())  # The default configuration is the same as conf/system.ini
+>>> from postgres_cstore import Config, Client
+>>> ps = Client(config=Config())  # The default configuration is the same as conf/system.ini
 >>> print(ps.execute(sql="SELECT customer_id, review_date from test.customer_reviews LIMIT 10;"))  # Execute sql.
 customer_id   | review_date 
 ----------------+-------------
@@ -281,14 +279,12 @@ Here is the code of the etlt_customer_reviews.py.
 ```pycon
 # Import related to the ETL process.
 from collections import OrderedDict
-from postgres_cstore.config import Config
-from postgres_cstore.file_io import FileIO
-from postgres_cstore.postgres_cstore import PostgresCstore
+from postgres_cstore import Config, FileIO, Client
 
-# Make an instance of FileIO and PostgresCstore.
+# Make an instance of FileIO and Client.
 config = Config()
 io = FileIO(config)
-ps = PostgresCstore(config)
+ps = Client(config)
 
 # Define data types of the raw data. dtype is OrderedDict of a pair of column name and data type.
 dtype = OrderedDict([
@@ -322,7 +318,7 @@ df, processed_file_list = io.data_load(
 # print(processed_file_list)
 # ['data/customer_reviews_1999.csv', 'data/customer_reviews_1998.csv']
 
-# You can cleanse or preprocess the data using python libraries.
+# You can cleanse pr preprocess the data using python libraries.
 subset = ['customer_id', 'review_date', 'product_id']
 df = df.dropna(subset=subset)
 df = df.drop_duplicates(subset=subset, keep='first')

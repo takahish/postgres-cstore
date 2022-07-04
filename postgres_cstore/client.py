@@ -10,7 +10,7 @@ from postgres_cstore.config import Config
 from postgres_cstore.process import Process
 
 
-class PostgresCstore(object):
+class Client(object):
     """PostgresCstore class.
     """
     def __init__(self, config: Config) -> None:
