@@ -118,15 +118,15 @@ $ tar -jcvf warehouse.tar.bz2 warehouse
 ```
 
 ```shell
+# Restore volume.
+$ tar -jxvf warehouse.tar.bz2 
+
 # Run container.
-$ docker-compose -f docker-compose.yml up -d
+$ docker-compose up -d
 
 # Here is psql connection settings.
 $ export PGUSER=dwhuser
 $ export PGPASSWORD=dwhuser
-
-# Restore volume.
-$ tar -jxvf warehouse.tar.bz2 
 
 $ psql -h localhost -U dwhuser -d dwhuser -f src/dml/find_customer_reviews.sql
   customer_id   | review_date | review_rating | product_id 
@@ -156,34 +156,37 @@ $ psql -h localhost -d dwhuser -f src/dml/take_correlation_customer_reviews.sql
 
 ```pycon
 >>> from postgres_cstore import Config, Container
->>> c = Container(config=Config())  # The default configuration is the same as conf/system.ini
->>> c.run()  # Run container from image and start container.
->>> c.run()  # An error occurs if the container already exists. 
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-  File "/Users/takahiro/work/postgres-cstore/postgres_cstore/container.py", line 56, in run
-    volume=self.volume
-  File "/Users/takahiro/work/postgres-cstore/postgres_cstore/process.py", line 17, in run
-    raise Exception(output)
-Exception: docker: Error response from daemon: Conflict. The container name "/postgres-cstore" is already in use by container "56f3bdc5855a0e6a467854d656dd051ae46e9fc2c39de12ab09c097752a80f03". You have to remove (or rename) that container to be able to reuse that name.
-See 'docker run --help'.
->>> c.stop()  # Stop container.
-'postgres-cstore'
->>> c.start()  # Start container if the container already exists.
-'postgres-cstore'
->>> c.stop()  # Stop container.
-'postgres-cstore'
->>>
+
+# The default configuration is the same as conf/system.ini
+>>> c = Container(config=Config())
+
+# Start containers of composing (default docker-compose.yml).
+>>> print(c.compose_up())
+Creating network "postgres-cstore_default" with the default driver
+Creating postgres-cstore_postgres-cstore_1 ... 
+Creating postgres-cstore_postgres-cstore_1 ... done
+
+# Stop containers.
+>>> print(c.compose_down())
+Stopping postgres-cstore_postgres-cstore_1 ... 
+Stopping postgres-cstore_postgres-cstore_1 ... done
+Removing postgres-cstore_postgres-cstore_1 ... 
+Removing postgres-cstore_postgres-cstore_1 ... done
+Removing network postgres-cstore_default
 ```
 
-### Manipulate postgres_cstore
+### Manipulate postgres with columnar store
 
 The First is an execution of SQL. The exec method returns an output as a string.
 
 ```pycon
 >>> from postgres_cstore import Config, Client
->>> ps = Client(config=Config())  # The default configuration is the same as conf/system.ini
->>> print(ps.execute(sql="SELECT customer_id, review_date from test.customer_reviews LIMIT 10;"))  # Execute sql.
+
+# The default configuration is the same as conf/system.ini
+>>> ps = Client(config=Config()) 
+
+# Execute sql.
+>>> print(ps.execute(sql="SELECT customer_id, review_date from test.customer_reviews LIMIT 10;"))
 customer_id   | review_date 
 ----------------+-------------
  AE22YDHSBFYIP  | 1970-12-30
@@ -197,7 +200,9 @@ customer_id   | review_date
  ATVPDKIKX0DER  | 1995-07-18
  ATVPDKIKX0DER  | 1995-07-18
 (10 rows)
->>> print(ps.execute_from_file(sql_file="src/dml/find_customer_reviews.sql"))  # Execute sql that is written in a file.
+
+# Execute sql that is written in a file.
+>>> print(ps.execute_from_file(sql_file="src/dml/find_customer_reviews.sql"))
 customer_id   | review_date | review_rating | product_id 
 ----------------+-------------+---------------+------------
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 0399128964
@@ -206,7 +211,9 @@ customer_id   | review_date | review_rating | product_id
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 0881036366
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 1559949570
 (5 rows)
->>> print(ps.execute_from_template(sql_template="src/dml/find_customer_reviews_template.sql", placeholder={'customer_id': 'A27T7HVDXA3K2A'}))  # Execute sql that is written in a template with keyword arguments.
+
+# Execute sql that is written in a template with keyword arguments.
+>>> print(ps.execute_from_template(sql_template="src/dml/find_customer_reviews_template.sql", placeholder={'customer_id': 'A27T7HVDXA3K2A'}))
 customer_id   | review_date | review_rating | product_id 
 ----------------+-------------+---------------+------------
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 0399128964
@@ -220,7 +227,8 @@ customer_id   | review_date | review_rating | product_id
 The second is an extraction of data from the output. The output is pandas.DataFrame object. The method doesn’t need a Postgres client library such as pycong2 (It only needs pandas).
 
 ```pycon
->>> first_query = ps.make_query_id() # The hash_id identifies a query.
+# Extract data.
+>>> first_query = ps.make_query_id()
 >>> df = ps.extract(sql="SELECT customer_id, review_date from test.customer_reviews LIMIT 10;", query_id=first_query)
 >>> df
       customer_id review_date
@@ -234,6 +242,8 @@ The second is an extraction of data from the output. The output is pandas.DataFr
 7  A1HPIDTM9SRBLP  1995-07-18
 8   ATVPDKIKX0DER  1995-07-18
 9   ATVPDKIKX0DER  1995-07-18
+
+# Extract data using sql that is written in a file.
 >>> second_query = ps.make_query_id()
 >>> df = ps.extract_from_file(sql_file="src/dml/find_customer_reviews.sql", query_id=second_query)
 >>> df
@@ -243,6 +253,8 @@ The second is an extraction of data from the output. The output is pandas.DataFr
 2  A27T7HVDXA3K2A  1998-04-10              5  0441172717
 3  A27T7HVDXA3K2A  1998-04-10              5  0881036366
 4  A27T7HVDXA3K2A  1998-04-10              5  1559949570
+
+# Extract data using sql that is written in a template with keyword arguments.
 >>> third_query = ps.make_query_id()
 >>> df = ps.extract_from_template(sql_template="src/dml/find_customer_reviews_template.sql", placeholder={'customer_id': 'A27T7HVDXA3K2A'}, query_id=third_query)
 >>> df
@@ -279,12 +291,16 @@ Here is the code of the etlt_customer_reviews.py.
 ```pycon
 # Import related to the ETL process.
 from collections import OrderedDict
-from postgres_cstore import Config, FileIO, Client
+from postgres_cstore import Config, Container, FileIO, Client
 
 # Make an instance of FileIO and Client.
 config = Config()
+ct = Container(config)
 io = FileIO(config)
 ps = Client(config)
+
+# Start containers of composing to store the data processed as ETL/ELT/EtLT.
+_ = ct.compose_up()
 
 # Define data types of the raw data. dtype is OrderedDict of a pair of column name and data type.
 dtype = OrderedDict([

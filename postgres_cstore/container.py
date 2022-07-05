@@ -65,3 +65,36 @@ class Container(object):
             version=version,
         ))
         return image, version
+
+    def check_compose_file(self, compose_file: str = None):
+        """Check a compose file. Return a default compose file if compose_file is None.
+        :param compose_file: A custom docker-compose file.
+        :return: The docker-compose file.
+        """
+        if compose_file is None:
+            return self.config.compose_file
+        return compose_file
+
+    def compose_build(self, compose_file: str = None) -> str:
+        """Build the images of composing.
+        :param compose_file: str. A docker-compose file.
+        :return: str. The result of the standard output of the `docker-compose build` command.
+        """
+        cmd = "docker-compose -f {compose_file} up -d"
+        return Process.run(cmd.format(compose_file=self.check_compose_file(compose_file)))
+
+    def compose_up(self, compose_file: str = None) -> str:
+        """Start the containers of composing.
+        :param compose_file: str. A docker-compose file.
+        :return: str. The result of the standard output of the `docker-compose up -d` command.
+        """
+        cmd = "docker-compose -f {compose_file} up -d"
+        return Process.run(cmd.format(compose_file=self.check_compose_file(compose_file)))
+
+    def compose_down(self, compose_file: str = None) -> str:
+        """Stop the containers of composing.
+        :param compose_file: str. A docker-compose file.
+        :return: str. The result of the standard output of the `docker-compose down` command.
+        """
+        cmd = "docker-compose -f {compose_file} down"
+        return Process.run(cmd.format(compose_file=self.check_compose_file(compose_file)))

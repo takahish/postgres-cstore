@@ -8,6 +8,9 @@ _config.read('conf/system.ini')
 
 @dataclass
 class Config:
+    # Set container composing settings.
+    compose_file: str = _config.get('CONTAINER_COMPOSE', 'compose_file')
+
     # Set container settings.
     name: str = _config.get('CONTAINER', 'name')
     image: str = _config.get('CONTAINER', 'image')

@@ -1,11 +1,15 @@
 from collections import OrderedDict
 
-from postgres_cstore import Config, FileIO, Client
+from postgres_cstore import Config, Container, FileIO, Client
 
 # Make an instance of FileIO and Client.
 config = Config()
+ct = Container(config)
 io = FileIO(config)
 ps = Client(config)
+
+# Start containers of composing to store the data processed as ETL/ELT/EtLT.
+_ = ct.compose_up()
 
 # Define data types of the raw data. dtype is OrderedDict of a pair of column name and data type.
 dtype = OrderedDict([
