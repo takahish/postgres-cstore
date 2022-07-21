@@ -52,10 +52,14 @@ df = df.drop_duplicates(subset=subset, keep='first')
 # The io.data_dump method returns the output message from process. In this case, it is ignored.
 _ = io.data_dump(data_frame=df, temporary_file_name='customer_reviews.csv', index=False, header=False)
 
+# Create a foreign server of cstore_fdw.
+_ = ps.execute(sql="CREATE EXTENSION IF NOT EXISTS cstore_fdw;")
+_ = ps.execute(sql="CREATE SERVER IF NOT EXISTS cstore_server FOREIGN DATA WRAPPER cstore_fdw;")
+
 # Recreate the table on the postgres-cstore.
 # The ps.execute method returns the output message from process. In this case, it is ignored.
-_ = ps.execute(sql="DROP FOREIGN TABLE test.customer_reviews;")
 _ = ps.execute(sql="CREATE SCHEMA IF NOT EXISTS test;")
+_ = ps.execute(sql="DROP FOREIGN TABLE IF EXISTS test.customer_reviews;")
 _ = ps.execute(sql="""
 CREATE FOREIGN TABLE IF NOT EXISTS test.customer_reviews
 (

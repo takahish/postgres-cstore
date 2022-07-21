@@ -14,7 +14,7 @@ services:
     environment:
       POSTGRES_USER: dwhuser
       POSTGRES_PASSWORD: dwhuser
-      POSTGRES_DB: dwhuser
+      POSTGRES_DB: dwh
     ports:
       - 5432:5432
     volumes:

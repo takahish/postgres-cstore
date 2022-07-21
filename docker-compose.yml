@@ -2,22 +2,49 @@ version: "3"
 services:
   postgres-cstore:
     image: takahish/postgres-cstore:12.11.1
+    container_name: postgres-cstore
     restart: always
     environment:
-      POSTGRES_USER: dwhuser
-      POSTGRES_PASSWORD: dwhuser
-      POSTGRES_DB: dwhuser
+      POSTGRES_USER_FILE: /run/secrets/dwh_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/dwh_password
+      POSTGRES_DB: dwh
     ports:
       - 5432:5432
     volumes:
       - ./warehouse:/var/lib/postgresql/data
-  pgadmin:
-    image: dpage/pgadmin4:6.11
-    restart: always
-    ports:
-      - 8080:80
+    networks:
+      - dwh-network
+    secrets:
+      - dwh_password
+      - dwh_user
+  metabase:
+    image: metabase/metabase:v0.43.4
+    container_name: metabase
+    hostname: metabase
     volumes:
-      - ./pgadmin:/var/lib/pgadmin
+      - ./metabase:/metabase-data
+    ports:
+      - 3000:3000
     environment:
-      PGADMIN_DEFAULT_EMAIL: pgadmin@cons.jp
-      PGADMIN_DEFAULT_PASSWORD: pgadmin
+      MB_DB_FILE: /metabase-data/metabase.db
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: dwh
+      MB_DB_PORT: 5432
+      MB_DB_USER_FILE: /run/secrets/dwh_user
+      MB_DB_PASS_FILE: /run/secrets/dwh_password
+      MB_DB_HOST: postgres-cstore
+    networks:
+      - dwh-network
+    depends_on:
+      - postgres-cstore
+    secrets:
+      - dwh_password
+      - dwh_user
+networks:
+  dwh-network:
+    driver: bridge
+secrets:
+   dwh_password:
+     file: sec/dwh_password.txt
+   dwh_user:
+     file: sec/dwh_user.txt

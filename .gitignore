@@ -137,5 +137,5 @@ data/query
 # The temporary of postgres-cstore
 tmp
 
-# The pgadmin data
-pgadmin
+# The metadata data
+metabase
