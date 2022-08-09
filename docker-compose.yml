@@ -19,6 +19,7 @@ services:
       - dwh_user
   pgadmin:
     image: dpage/pgadmin4:6.11
+    container_name: pgadmin
     restart: always
     ports:
       - 8080:80
