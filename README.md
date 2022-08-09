@@ -48,13 +48,13 @@ $ export PGPASSWORD=dwhuser
 
 # Connect persistent-postgres-cstore.
 # Prerequisite is to install postgresql for using psql.
-$ psql -h localhost -d dwhuser
+$ psql -h localhost -d dwh
 psql (13.1, server 12.11 (Debian 12.11-1.pgdg110+1))
 Type "help" for help.
 
-dwhuser=# \dt
+dwh=# \dt
 Did not find any relations.
-dwhuser=# \q
+dwh=# \q
 ```
 
 ### Load data
@@ -64,31 +64,31 @@ dwhuser=# \q
 $ data/download_customer_reviews.sh
 
 # Create foreign server.
-$ psql -h localhost -d dwhuser -f src/ddl/cstore_fdw.sql 
+$ psql -h localhost -d dwh -f src/ddl/cstore_fdw.sql 
 CREATE EXTENSION
 CREATE SERVER
 
 # Difine tables.
-$ psql -h localhost -d dwhuser -f src/ddl/test_customer_reviews.sql
+$ psql -h localhost -d dwh -f src/ddl/test_customer_reviews.sql
 CREATE SCHEMA
 CREATE FOREIGN TABLE
 
 # Load sample data.
 # Use \copy meta-command.
-$ psql -h localhost -d dwhuser
+$ psql -h localhost -d dwh
 psql (13.1, server 12.11 (Debian 12.11-1.pgdg110+1))
 Type "help" for help.
 
-dwhuser=# \copy test.customer_reviews from 'data/customer_reviews_1998.csv' with csv
+dwh=# \copy test.customer_reviews from 'data/customer_reviews_1998.csv' with csv
 
 COPY 589859
-dwhuser=# \copy test.customer_reviews from 'data/customer_reviews_1999.csv' with csv
+dwh=# \copy test.customer_reviews from 'data/customer_reviews_1999.csv' with csv
 COPY 1172645
-dwhuser=# ANALYZE test.customer_reviews;
+dwh=# ANALYZE test.customer_reviews;
 ANALYZE
-dwhuser=# \q
+dwh=# \q
 
-$ psql -h localhost -U dwhuser -d dwhuser -f src/dml/find_customer_reviews.sql
+$ psql -h localhost -U dwhuser -d dwh -f src/dml/find_customer_reviews.sql
   customer_id   | review_date | review_rating | product_id 
 ----------------+-------------+---------------+------------
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 0399128964
@@ -98,7 +98,7 @@ $ psql -h localhost -U dwhuser -d dwhuser -f src/dml/find_customer_reviews.sql
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 1559949570
 (5 rows)
 
-$ psql -h localhost -d dwhuser -f src/dml/take_correlation_customer_reviews.sql
+$ psql -h localhost -d dwh -f src/dml/take_correlation_customer_reviews.sql
  title_length_bucket | review_average | count  
 ---------------------+----------------+--------
                    1 |           4.26 | 139034
@@ -128,7 +128,7 @@ $ docker-compose up -d
 $ export PGUSER=dwhuser
 $ export PGPASSWORD=dwhuser
 
-$ psql -h localhost -U dwhuser -d dwhuser -f src/dml/find_customer_reviews.sql
+$ psql -h localhost -U dwhuser -d dwh -f src/dml/find_customer_reviews.sql
   customer_id   | review_date | review_rating | product_id 
 ----------------+-------------+---------------+------------
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 0399128964
@@ -138,7 +138,7 @@ $ psql -h localhost -U dwhuser -d dwhuser -f src/dml/find_customer_reviews.sql
  A27T7HVDXA3K2A | 1998-04-10  |             5 | 1559949570
 (5 rows)
 
-$ psql -h localhost -d dwhuser -f src/dml/take_correlation_customer_reviews.sql
+$ psql -h localhost -d dwh -f src/dml/take_correlation_customer_reviews.sql
  title_length_bucket | review_average | count  
 ---------------------+----------------+--------
                    1 |           4.26 | 139034
