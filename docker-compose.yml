@@ -1,7 +1,7 @@
 version: "3"
 services:
   postgres-cstore:
-    image: takahish/postgres-cstore:12.11.1
+    image: takahish/postgres-cstore:12.11.2
     container_name: postgres-cstore
     restart: always
     environment:

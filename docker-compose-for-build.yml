@@ -5,17 +5,35 @@ services:
     build:
       context: lib/postgres/12/bullseye
       dockerfile: Dockerfile
+    networks:
+      - dwh-network
   postgres-cstore:
-    image: postgres-cstore:12.11.1
+    image: postgres-cstore:12.11.2
+    container_name: postgres-cstore
     restart: always
     build:
      context: ./
      dockerfile: Dockerfile
     environment:
-      POSTGRES_USER: dwhuser
-      POSTGRES_PASSWORD: dwhuser
+      POSTGRES_USER_FILE: /run/secrets/dwh_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/dwh_password
       POSTGRES_DB: dwh
     ports:
       - 5432:5432
     volumes:
       - ./warehouse:/var/lib/postgresql/data
+    networks:
+      - dwh-network
+    depends_on:
+      - postgres
+    secrets:
+      - dwh_password
+      - dwh_user
+networks:
+  dwh-network:
+    driver: bridge
+secrets:
+   dwh_password:
+     file: sec/dwh_password.txt
+   dwh_user:
+     file: sec/dwh_user.txt
