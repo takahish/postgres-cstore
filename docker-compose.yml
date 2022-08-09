@@ -17,6 +17,20 @@ services:
     secrets:
       - dwh_password
       - dwh_user
+  pgadmin:
+    image: dpage/pgadmin4:6.11
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin@pgadmin.jp
+      PGADMIN_DEFAULT_PASSWORD: pgadmin
+    networks:
+      - dwh-network
+    depends_on:
+      - postgres-cstore
   metabase:
     image: metabase/metabase:v0.43.4
     container_name: metabase
